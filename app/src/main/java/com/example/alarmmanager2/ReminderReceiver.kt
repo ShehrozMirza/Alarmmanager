@@ -17,7 +17,12 @@ import android.media.MediaPlayer
 
 class ReminderReceiver : BroadcastReceiver() {
 
+
     companion object {
+
+        var hour: Int = 0
+        var minute: Int = 0
+
         private const val REQUEST_TIMER1 = 1
         private const val PARAM_NAME = "name"
 
@@ -31,13 +36,16 @@ class ReminderReceiver : BroadcastReceiver() {
             )
         }
 
-        fun startAlarm(context: Context, startMillis: Long? = null) {
+        fun startAlarm(context: Context, hr: Int, min: Int) {
+
+            hour = hr
+            minute = min
 
             val pendingIntent = getIntent(context, REQUEST_TIMER1)
             val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
             // trigger at 5:45 pm
-            val alarmTime = LocalTime.of(18, 6)
+            val alarmTime = LocalTime.of(hour, minute)
 
             var now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)
             val nowTime = now.toLocalTime()
@@ -94,7 +102,7 @@ class ReminderReceiver : BroadcastReceiver() {
         } finally {
             //use try/catch to make sure next day alarm is set even if exception happens
             //start alarm for next day
-            startAlarm(context!!)
+            startAlarm(context!!, hour, minute)
         }
     }
 
@@ -103,7 +111,7 @@ class ReminderReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Timber.d("onReceive=${intent.action}")
             if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_REBOOT) {
-                startAlarm(context)
+                startAlarm(context, hour, minute)
             }
         }
     }
